@@ -18,6 +18,8 @@ def scrape_info():
     # Visit NASA
     browser.visit(nasa_url)  
 
+    time.sleep(1)
+
     html = browser.html
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -36,7 +38,8 @@ def scrape_info():
     # Visit jpl
     jpl_url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
     browser.visit(jpl_url)  
-
+    time.sleep(1)
+    
     html = browser.html
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -49,22 +52,25 @@ def scrape_info():
     # Close the browser after scraping
     browser.quit()
 
+    # Scrape weather data from Twitter
     twitter_url = "https://twitter.com/marswxreport?lang=en"
     response = requests.get(twitter_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     twitter = soup.find('div', class_='js-tweet-text-container')
     mars_weather= twitter.get_text()
 
+    # Scrape mars information table
     planet_url = "https://space-facts.com/mars/"
     tables = pd.read_html(planet_url)
-    # df = tables[1].set_index("Mars - Earth Comparison")
-    planet_html = tables[1].to_html(index=False)
+    df = tables[0]
+    df.rename(columns = {0:"description", 1: "value"}, inplace = True)
+    planet_html = df.to_html(index=False)
 
+    # Get hemisphere image urls
     astro_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
     response = requests.get(astro_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     download = soup.find_all('a', class_="itemLink product-item")
-
     usgs_url = "https://astrogeology.usgs.gov"
     hemisphere_image_urls = []
 
